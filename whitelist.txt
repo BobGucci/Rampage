@@ -1,6 +1,5 @@
 if lt[761430509] then -- negraysonn
 if lt[5095159939] then -- BobAccountTest
-if lt[5096830050] then -- BobGucci
 if lt[2763995918] then -- Bliz_T
 if lt[3796494548] then -- woldica
 if lt[1374862556] then -- mathias_sw
