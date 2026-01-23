@@ -1,0 +1,2 @@
+loadstring(game:HttpGet("https://gist.githubusercontent.com/BobGucci/9d89d768524399a977672957a4e56717/raw/d6bdd2fa2b5852f3fda9ad480db82e66b60dc67d/Rampage
+"))()
