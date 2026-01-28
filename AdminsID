@@ -1,4 +1,4 @@
-if lt[5096830050] then
-if lt[5095159939] then
-if lt[2636495757] then
-if lt[761430509] then
+if lt[5096830050] then return true end
+if lt[5095159939] then return true end
+if lt[2636495757] then return true end
+if lt[761430509] then return true end
