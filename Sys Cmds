@@ -18,16 +18,15 @@ local superAdmins = {
 }
 
 local admins = {
-    ["expfps"] = true,
-    ["EndOfReset"] = true,
-    ["imagineusingsolara"] = true,
-    ["ThriIl3Rz"] = true,
-	["zacking174_yt"] = true,
-	["alanExt2_intyV04s2z"] = true,
-	["Spelluncis"] = true
+    [""] = true,
+    [""] = true,
+    [""] = true,
+    [""] = true,
+	[""] = true,
+	[""] = true,
+	[""] = true
 }
 
--- ⭐
 local commandHelp = {
     ".chat (target) (text)",
     ".kick (target)",
@@ -284,4 +283,4 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
-print("V29 Loaded, by oats, for", LocalPlayer.DisplayName)
+print("V29 Loaded, ", LocalPlayer.DisplayName)
